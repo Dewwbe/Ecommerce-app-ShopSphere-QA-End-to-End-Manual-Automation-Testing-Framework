@@ -200,6 +200,40 @@ headless mode, and wait timeouts — override any of them with `-D`, e.g.
 | TC-CHECKOUT-001| End-to-end: catalog → cart → order → payment step reached       | Smoke / Functional |
 | TC-CHECKOUT-002| Checkout requires a shipping address                            | Regression |
 
+## 5a. Playwright suite
+
+`playwright-tests/` re-implements the key smoke scenarios (registration, login, catalog, cart,
+checkout) in Playwright, reusing the same `TC-*` IDs. See [playwright-tests/README.md](playwright-tests/README.md).
+
+```bash
+cd playwright-tests && npm install && npx playwright install chromium
+npm run test:smoke && npm run report
+```
+
+## 5b. Test reports
+
+| Suite | Report | How to view |
+|---|---|---|
+| Selenium + TestNG | Allure (steps, failure screenshots) and Surefire HTML | `cd selenium-tests && mvn test && mvn allure:serve` |
+| Playwright | Built-in HTML report with traces | `cd playwright-tests && npm run report` |
+| Jest | Console output per service | `npm test` |
+
+<!-- After your first run, save a screenshot to docs/screenshots/ and uncomment:
+![Allure report](docs/screenshots/allure-report.png)
+![Playwright report](docs/screenshots/playwright-report.png)
+-->
+
+## 5c. Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request to `main` and `develop`:
+
+1. Jest tests for each service and the gateway (matrix job)
+2. `docker compose up --build`, wait for the frontend, then seed the catalog
+3. Selenium smoke tests (`mvn test -Dgroups=smoke`) and an Allure report
+4. Playwright smoke tests
+
+Reports and failure screenshots are uploaded as workflow artifacts (`selenium-reports`, `playwright-report`).
+
 ## 6. Project layout
 
 ```
@@ -213,7 +247,10 @@ ecommerce-microservices/
 │   └── payment-service/
 ├── shared/rabbitmq/messageBus.js   # shared publish/subscribe helper
 ├── frontend/                        # React + Vite SPA
-├── selenium-tests/                  # Java/Selenium/TestNG UI suite
+├── selenium-tests/                  # Java/Selenium/TestNG UI suite (Allure reports)
+├── playwright-tests/                # Playwright smoke suite
+├── docs/                            # test plan, test cases, traceability, bug reports
+├── .github/                         # CI workflow, PR and issue templates
 ├── docker-compose.yml
 └── .env.example
 ```
