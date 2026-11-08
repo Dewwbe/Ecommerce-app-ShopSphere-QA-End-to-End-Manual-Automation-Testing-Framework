@@ -1,0 +1,41 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="ShopSphere UI Test Suite" parallel="methods" thread-count="2">
+
+    <!--
+        Run with: mvn test -DsuiteXmlFile=testng.xml
+        Run only smoke tests:      mvn test -Dgroups=smoke
+        Run only regression tests: mvn test -Dgroups=regression
+    -->
+
+    <test name="Smoke Tests">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="tests.RegistrationTests"/>
+            <class name="tests.LoginTests"/>
+            <class name="tests.ProductBrowsingTests"/>
+            <class name="tests.CartTests"/>
+            <class name="tests.CheckoutSmokeTests"/>
+        </classes>
+    </test>
+
+    <test name="Full Functional and Regression Suite">
+        <groups>
+            <run>
+                <include name="functional"/>
+                <include name="regression"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="tests.RegistrationTests"/>
+            <class name="tests.LoginTests"/>
+            <class name="tests.ProductBrowsingTests"/>
+            <class name="tests.CartTests"/>
+            <class name="tests.CheckoutSmokeTests"/>
+        </classes>
+    </test>
+
+</suite>
