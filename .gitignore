@@ -6,3 +6,9 @@ build/
 target/
 selenium-tests/target/
 .DS_Store
+
+# Test reports
+playwright-report/
+test-results/
+allure-results/
+allure-report/

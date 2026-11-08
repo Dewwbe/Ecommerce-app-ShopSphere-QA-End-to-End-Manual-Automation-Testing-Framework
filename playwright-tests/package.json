@@ -1,0 +1,15 @@
+{
+  "name": "shopsphere-playwright-tests",
+  "version": "1.0.0",
+  "description": "Playwright smoke tests for the ShopSphere UI (companion to the Selenium suite)",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.47.2"
+  }
+}
