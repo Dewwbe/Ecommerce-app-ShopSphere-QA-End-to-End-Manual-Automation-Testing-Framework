@@ -15,3 +15,12 @@
 | REQ-11 | Cart is cleared after an order | | MAN-009 | cart.test.js |
 | REQ-12 | Protected endpoints enforce authentication and roles | | MAN-004, 005 | all service tests |
 | REQ-13 | Gateway handles unavailable services gracefully | | MAN-006 | gateway.test.js |
+
+## Test levels beyond the UI
+
+| Level | Location | Requirements covered |
+|---|---|---|
+| Unit | `services/*/tests/unit/` | REQ-01..04 (validation, JWT), REQ-10, REQ-11 (consumers), REQ-12 (auth/role middleware) |
+| Contract | `services/*/tests/contract.test.js`, `contracts/` | REQ-07, REQ-09, REQ-10, REQ-11 (payload shapes between services) |
+| Cross-service integration | `integration-tests/` | REQ-07..11, REQ-12, REQ-13 over real RabbitMQ and REST |
+| Frontend component | `frontend/src/**/*.test.jsx` | REQ-02..08 (forms, navbar, cart, route protection) |

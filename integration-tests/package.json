@@ -1,0 +1,20 @@
+{
+  "name": "shopsphere-integration-tests",
+  "version": "1.0.0",
+  "description": "Black-box cross-service integration tests (REST + real RabbitMQ events) for the ShopSphere docker-compose stack",
+  "private": true,
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 30000,
+    "globalSetup": "./helpers/globalSetup.js",
+    "testMatch": ["**/tests/**/*.test.js"]
+  },
+  "devDependencies": {
+    "amqplib": "^0.10.4",
+    "axios": "^1.7.2",
+    "jest": "^29.7.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$id": "payment.failed",
+  "title": "payment.failed event",
+  "description": "Published by payment-service after a signed Stripe webhook. Consumed by order-service (marks the order PAYMENT_FAILED).",
+  "type": "object",
+  "required": ["orderId", "userId", "paymentIntentId", "reason"],
+  "properties": {
+    "orderId": { "type": "string", "minLength": 1 },
+    "userId": { "type": "string", "minLength": 1 },
+    "paymentIntentId": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string" }
+  },
+  "examples": [
+    { "orderId": "665f1c2e8f1b2a0012345678", "userId": "user-1", "paymentIntentId": "pi_123", "reason": "card_declined" }
+  ]
+}

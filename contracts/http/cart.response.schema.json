@@ -1,0 +1,27 @@
+{
+  "$id": "cart.response",
+  "title": "GET /api/cart response",
+  "description": "Provided by cart-service, consumed by order-service when placing an order.",
+  "type": "object",
+  "required": ["userId", "items", "total"],
+  "properties": {
+    "userId": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["productId", "name", "price", "quantity"],
+        "properties": {
+          "productId": { "type": "string" },
+          "name": { "type": "string" },
+          "price": { "type": "number", "minimum": 0 },
+          "quantity": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "total": { "type": "number", "minimum": 0 }
+  },
+  "examples": [
+    { "userId": "user-1", "items": [{ "productId": "p1", "name": "Widget", "price": 10, "quantity": 2 }], "total": 20 }
+  ]
+}

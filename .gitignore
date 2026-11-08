@@ -12,3 +12,6 @@ playwright-report/
 test-results/
 allure-results/
 allure-report/
+
+# Frontend test coverage
+coverage/

@@ -1,0 +1,13 @@
+{
+  "$id": "payment.succeeded",
+  "title": "payment.succeeded event",
+  "description": "Published by payment-service after a signed Stripe webhook. Consumed by order-service (marks the order PAID).",
+  "type": "object",
+  "required": ["orderId", "userId", "paymentIntentId"],
+  "properties": {
+    "orderId": { "type": "string", "minLength": 1 },
+    "userId": { "type": "string", "minLength": 1 },
+    "paymentIntentId": { "type": "string", "minLength": 1 }
+  },
+  "examples": [{ "orderId": "665f1c2e8f1b2a0012345678", "userId": "user-1", "paymentIntentId": "pi_123" }]
+}

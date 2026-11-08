@@ -1,0 +1,36 @@
+{
+  "$id": "order.created",
+  "title": "order.created event",
+  "description": "Published by order-service. Consumed by cart-service (clears cart) and payment-service (creates PaymentIntent).",
+  "type": "object",
+  "required": ["orderId", "userId", "items", "total", "currency"],
+  "properties": {
+    "orderId": { "type": "string", "minLength": 1 },
+    "userId": { "type": "string", "minLength": 1 },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["productId", "name", "price", "quantity"],
+        "properties": {
+          "productId": { "type": "string" },
+          "name": { "type": "string" },
+          "price": { "type": "number", "minimum": 0 },
+          "quantity": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "total": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string", "minLength": 3 }
+  },
+  "examples": [
+    {
+      "orderId": "665f1c2e8f1b2a0012345678",
+      "userId": "user-1",
+      "items": [{ "productId": "p1", "name": "Widget", "price": 10, "quantity": 2 }],
+      "total": 20,
+      "currency": "usd"
+    }
+  ]
+}

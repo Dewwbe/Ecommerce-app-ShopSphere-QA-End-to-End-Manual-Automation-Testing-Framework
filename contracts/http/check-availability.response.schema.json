@@ -1,0 +1,30 @@
+{
+  "$id": "check-availability.response",
+  "title": "POST /api/products/internal/check-availability response",
+  "description": "Provided by product-service, consumed by cart-service. An available result carries price and name; an unavailable one carries a reason.",
+  "type": "object",
+  "required": ["results"],
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["productId", "available"],
+        "properties": {
+          "productId": { "type": "string" },
+          "available": { "type": "boolean" },
+          "reason": { "enum": ["not_found", "insufficient_stock"] },
+          "price": { "type": "number", "minimum": 0 },
+          "name": { "type": "string" }
+        },
+        "if": { "properties": { "available": { "const": true } } },
+        "then": { "required": ["price", "name"] },
+        "else": { "required": ["reason"] }
+      }
+    }
+  },
+  "examples": [
+    { "results": [{ "productId": "p1", "available": true, "price": 10, "name": "Widget" }] },
+    { "results": [{ "productId": "p2", "available": false, "reason": "insufficient_stock" }] }
+  ]
+}

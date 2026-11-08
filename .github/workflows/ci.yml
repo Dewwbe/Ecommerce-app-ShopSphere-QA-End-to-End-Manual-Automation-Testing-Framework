@@ -29,7 +29,36 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - run: npm test
+      - name: Unit, API and contract tests with coverage
+        run: npm run test:coverage
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ strategy.job-index }}
+          path: ${{ matrix.project }}/coverage
+          if-no-files-found: ignore
+
+  frontend-tests:
+    name: Frontend tests (Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run test:coverage
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-frontend
+          path: frontend/coverage
+          if-no-files-found: ignore
 
   ui-smoke-tests:
     name: UI smoke tests (Selenium + Playwright)
@@ -59,6 +88,16 @@ jobs:
 
       - name: Seed product catalog
         run: docker compose exec -T product-service npm run seed
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cross-service integration tests (real RabbitMQ events)
+        working-directory: integration-tests
+        run: |
+          npm install
+          npm test
 
       - uses: actions/setup-java@v4
         with:

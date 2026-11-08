@@ -32,7 +32,11 @@ unauthorised access and downstream failures.
 
 | Level | Tool | Where | Notes |
 |---|---|---|---|
-| Unit / API integration | Jest, Supertest, mongodb-memory-server | `services/*/tests`, `api-gateway/tests` | RabbitMQ, Stripe and inter-service HTTP calls are mocked, so no infrastructure is needed |
+| Unit | Jest | `services/*/tests/unit` | Middleware, validators, JWT, model validation and event-consumer handlers with all dependencies mocked |
+| API integration (in-process) | Jest, Supertest, mongodb-memory-server | `services/*/tests`, `api-gateway/tests` | RabbitMQ, Stripe and inter-service HTTP calls are mocked, so no infrastructure is needed |
+| Contract | Jest, Ajv, JSON Schema | `contracts/`, `services/*/tests/contract.test.js` | Producer and consumer of every event and internal HTTP call test against the same schema |
+| Cross-service integration | Jest, axios, amqplib | `integration-tests/` | Runs against the live docker-compose stack with real RabbitMQ events |
+| Frontend component | Vitest, React Testing Library | `frontend/src` | Forms, navbar, route protection, cart and product list |
 | UI automation | Selenium WebDriver, TestNG, Page Object Model | `selenium-tests/` | Locators use `data-testid`; suites tagged `smoke`, `functional`, `regression` |
 | Manual / exploratory | Browser, DevTools, RabbitMQ UI | `docs/test-cases.md`, `docs/bug-reports.md` | Session-based charters for areas automation does not cover |
 

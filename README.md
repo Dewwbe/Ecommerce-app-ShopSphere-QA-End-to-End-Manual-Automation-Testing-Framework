@@ -149,6 +149,33 @@ Coverage includes: functional happy paths, input validation, auth/role
 checks (401/403), not-found and conflict cases (404/409), and cross-service
 failure handling (502 when a downstream service is unreachable).
 
+### 4a. Test pyramid
+
+| Level | Where | What it covers | Needs infrastructure? |
+|---|---|---|---|
+| Unit | `services/*/tests/unit/` | Middleware (JWT/role checks), validators, JWT utils, model validation, event-consumer handlers (with broker, DB and Stripe mocked) | No |
+| API / integration (in-process) | `services/*/tests/*.test.js` | Each service over HTTP with an in-memory MongoDB | No |
+| Contract | `services/*/tests/contract.test.js`, `contracts/` | Event and internal-HTTP payloads validated against shared JSON Schemas on both the producer and consumer side | No |
+| Cross-service integration | `integration-tests/` | Real RabbitMQ event flow and service-to-service REST through the gateway on the running stack | Yes (docker compose) |
+| Frontend component | `frontend/src/**/*.test.jsx` | Vitest + React Testing Library | No |
+| UI end-to-end | `selenium-tests/`, `playwright-tests/` | Browser journeys | Yes (docker compose) |
+
+```bash
+# per service (or api-gateway)
+npm run test:unit       # unit tests only
+npm test                # everything: unit + API + contract
+npm run test:coverage   # same, with a coverage report in coverage/
+
+# frontend
+cd frontend && npm test && npm run test:coverage
+
+# cross-service integration (stack must be running and seeded)
+cd integration-tests && npm install && npm test
+```
+
+See [contracts/README.md](contracts/README.md) for the contract-testing approach and
+[integration-tests/README.md](integration-tests/README.md) for the event-flow suite.
+
 ## 5. UI test suite (Selenium WebDriver + TestNG)
 
 Located in `selenium-tests/`. This is a classic black-box UI automation
