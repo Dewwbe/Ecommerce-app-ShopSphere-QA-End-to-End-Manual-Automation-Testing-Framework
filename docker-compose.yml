@@ -1,0 +1,162 @@
+version: "3.9"
+
+services:
+  # ---------- Infrastructure ----------
+  mongo:
+    image: mongo:7
+    container_name: shopsphere-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: shopsphere-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI (guest/guest)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- Microservices ----------
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: shopsphere-auth-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      PORT: 4001
+      MONGO_URI: mongodb://mongo:27017/auth-service
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-dev-shared-jwt-secret-change-me}
+      JWT_EXPIRES_IN: 1h
+    ports:
+      - "4001:4001"
+
+  product-service:
+    build:
+      context: .
+      dockerfile: services/product-service/Dockerfile
+    container_name: shopsphere-product-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      PORT: 4002
+      MONGO_URI: mongodb://mongo:27017/product-service
+      JWT_SECRET: ${JWT_SECRET:-dev-shared-jwt-secret-change-me}
+    ports:
+      - "4002:4002"
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: services/cart-service/Dockerfile
+    container_name: shopsphere-cart-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      product-service:
+        condition: service_started
+    environment:
+      PORT: 4003
+      MONGO_URI: mongodb://mongo:27017/cart-service
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-dev-shared-jwt-secret-change-me}
+      PRODUCT_SERVICE_URL: http://product-service:4002
+    ports:
+      - "4003:4003"
+
+  order-service:
+    build:
+      context: .
+      dockerfile: services/order-service/Dockerfile
+    container_name: shopsphere-order-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      cart-service:
+        condition: service_started
+    environment:
+      PORT: 4004
+      MONGO_URI: mongodb://mongo:27017/order-service
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-dev-shared-jwt-secret-change-me}
+      CART_SERVICE_URL: http://cart-service:4003
+    ports:
+      - "4004:4004"
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: services/payment-service/Dockerfile
+    container_name: shopsphere-payment-service
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      PORT: 4005
+      MONGO_URI: mongodb://mongo:27017/payment-service
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-dev-shared-jwt-secret-change-me}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+    ports:
+      - "4005:4005"
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: shopsphere-api-gateway
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+      - order-service
+      - payment-service
+    environment:
+      PORT: 4000
+      AUTH_SERVICE_URL: http://auth-service:4001
+      PRODUCT_SERVICE_URL: http://product-service:4002
+      CART_SERVICE_URL: http://cart-service:4003
+      ORDER_SERVICE_URL: http://order-service:4004
+      PAYMENT_SERVICE_URL: http://payment-service:4005
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:4000
+        VITE_STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+    container_name: shopsphere-frontend
+    depends_on:
+      - api-gateway
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongo-data:
